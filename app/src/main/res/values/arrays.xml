@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="unitsOfMeasure" >
+        <item>Metrisch (m, km)</item>
+        <item>Imperial (ft, mi)</item>
+    </string-array>
+    <string-array name="unitsOfMeasureAlias" >
+        <item>metric</item>
+        <item>imperial</item>
+    </string-array>
+    <string-array name="mapScaleNames">
+        <item>50 %</item><item>60 %</item><item>70 %</item><item>75 %</item><item>80 %</item><item>90 %</item>
+        <item>100 % (normal)</item><item>110 %</item><item>125 %</item><item>140 %</item><item>150 %</item>
+        <item>175 %</item><item>200 %</item>
+    </string-array>
+    <string-array name="mapScaleValues">
+        <item>50</item><item>60</item><item>70</item><item>75</item><item>80</item><item>90</item>
+        <item>100</item><item>110</item><item>125</item><item>140</item><item>150</item>
+        <item>175</item><item>200</item>
+    </string-array>
+    <string-array name="mapScaleLevelNames">
+        <item>Gröbere Stufe vergrössert zeigen</item>
+        <item>Genauere Stufe verkleinert zeigen</item>
+    </string-array>
+    <string-array name="mapScaleLevelValues">
+        <item>coarse</item>
+        <item>fine</item>
+    </string-array>
+    <string-array name="overlayOpacityNames">
+        <item>20 %</item><item>30 %</item><item>40 %</item><item>50 %</item><item>60 %</item><item>70 %</item>
+        <item>80 %</item><item>90 %</item><item>100 % (ganz deckend)</item>
+    </string-array>
+    <string-array name="overlayOpacityValues">
+        <item>20</item><item>30</item><item>40</item><item>50</item><item>60</item><item>70</item>
+        <item>80</item><item>90</item><item>100</item>
+    </string-array>
+</resources>

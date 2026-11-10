@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:key="mainScreen">
+
+    <PreferenceCategory android:title="@string/stg_cat_general"
+        app:iconSpaceReserved="false">
+
+        <CheckBoxPreference android:key="GPSisOn"
+            android:title="@string/stg_show_gps_title"
+            android:summary="@string/stg_show_gps_desc"
+            app:defaultValue="true"
+            app:iconSpaceReserved="false" />
+
+        <ListPreference android:key="MapScale"
+            android:title="Kartengrösse"
+            android:summary="%s – vergrössert oder verkleinert Schrift, Linien und Symbole der Rasterkarten"
+            android:defaultValue="100"
+            android:entries="@array/mapScaleNames"
+            android:entryValues="@array/mapScaleValues"
+            app:iconSpaceReserved="false" />
+
+        <CheckBoxPreference android:key="ShowOverlayButton"
+            android:title="@string/stg_show_overlay_btn_title"
+            android:summary="@string/stg_show_overlay_btn_desc"
+            app:defaultValue="false"
+            app:iconSpaceReserved="false" />
+
+        <CheckBoxPreference android:key="ShowRulerButton"
+            android:title="Lineal-Knopf anzeigen"
+            android:summary="Knopf links neben den Einstellungen zum Messen von Abständen (auch mit langem Druck auf die Einstellungen ein-/ausschaltbar)"
+            app:defaultValue="false"
+            app:iconSpaceReserved="false" />
+
+        <EditTextPreference android:key="ThunderforestKey"
+            android:title="OpenCycleMap: API-Schlüssel"
+            android:summary="OpenCycleMap kommt von Thunderforest und braucht einen kostenlosen Schlüssel (thunderforest.com → Sign up, Plan „Hobby Project“). Ohne Schlüssel steht „API Key Required“ auf der Karte."
+            android:dialogTitle="Thunderforest API-Schlüssel"
+            android:singleLine="true"
+            app:iconSpaceReserved="false" />
+
+        <ListPreference android:key="UnitsOfMeasure"
+            android:title="@string/stg_units"
+            android:defaultValue="metric"
+            android:entries="@array/unitsOfMeasure"
+            android:entryValues="@array/unitsOfMeasureAlias"
+            app:iconSpaceReserved="false" />
+
+        <CheckBoxPreference android:key="KeepScreenOn"
+            android:title="Bildschirm nicht ausschalten"
+            android:summary="Der Bildschirm bleibt an, solange die App offen ist (z.B. auf dem Velo). Braucht mehr Akku."
+            app:defaultValue="false"
+            app:iconSpaceReserved="false" />
+
+        <CheckBoxPreference android:key="ExperimentalOutOfCenterPointer"
+            android:title="Richtungspfeil am Bildschirmrand"
+            android:summary="Liegt der eigene Standort ausserhalb des sichtbaren Ausschnitts, zeigt ein Pfeil am Rand die Richtung und Entfernung. Antippen springt hin."
+            app:defaultValue="false"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Bedienung"
+        app:iconSpaceReserved="false">
+
+        <io.github.lorenzdenk.lorimaps.HelpPreference android:selectable="false" app:iconSpaceReserved="false"
+            android:title="Karte bewegen und zoomen"
+            android:summary="Mit einem Finger verschieben. Mit zwei Fingern auseinander- oder zusammenziehen, oder doppelt tippen, um hineinzuzoomen. Der Zoom rastet immer auf ganzen Stufen ein, damit die Karte scharf bleibt. Mit „Kartengrösse“ (oben) lassen sich die Rasterkarten grösser oder kleiner darstellen." />
+
+        <io.github.lorenzdenk.lorimaps.HelpPreference android:selectable="false" app:iconSpaceReserved="false"
+            android:title="⚙ Einstellungen (oben rechts)"
+            android:summary="Tippen: diese Einstellungen öffnen.\nLange drücken: Lineal-Knopf links daneben ein- oder ausblenden (wie die Einstellung „Lineal-Knopf anzeigen“)." />
+
+        <io.github.lorenzdenk.lorimaps.HelpPreference android:selectable="false" app:iconSpaceReserved="false"
+            android:title="🗺 Kartenauswahl (oben rechts)"
+            android:summary="Tippen oder lange drücken: Kartenmenü öffnen. Dort eine Karte wählen oder mit dem Stift umbenennen. Online-Karten (brauchen Internet): OpenTopoMap, OpenCycleMap (mit API-Schlüssel, siehe oben), CyclOSM und die Vektorkarte OpenFreeMap. Offline-Karten folgen in einer späteren Version." />
+
+        <io.github.lorenzdenk.lorimaps.HelpPreference android:selectable="false" app:iconSpaceReserved="false"
+            android:title="◇ Overlay (oben rechts, nur wenn oben eingeschaltet)"
+            android:summary="Tippen: alle Overlays ausblenden bzw. die zuletzt gezeigten wieder einblenden.\nLange drücken: Overlay-Liste – mehrere gleichzeitig möglich: Wander- und Velowege von Waymarked Trails (online, braucht Internet). Dort lässt sich auch die Reihenfolge ändern (oben in der Liste = obenauf) und für jedes Overlay die Deckkraft einstellen." />
+
+        <io.github.lorenzdenk.lorimaps.HelpPreference android:selectable="false" app:iconSpaceReserved="false"
+            android:title="🔍 Koordinaten suchen (oben rechts, links neben Lineal bzw. Einstellungen)"
+            android:summary="Koordinaten eingeben oder einfügen (kopierte Koordinaten stehen schon drin). Unter dem Feld steht, wie sie gelesen werden. „Suchen“ springt hin und markiert den Punkt mit einem blauen Fadenkreuz; antippen: als Pin speichern oder entfernen.\nErkannt werden: Dezimalgrad (-42.96245, 146.72793 · 42.96245 S 146.72793 E · auch mit Dezimalkomma oder ; / als Trenner), Grad und Dezimalminuten (42°57.747'S 146°43.676'E), Grad Minuten Sekunden (42°57'44.8&quot;S 146°43'40.6&quot;E, auch ohne Zeichen: 42 57 44.8 S 146 43 40.6 E), Länge zuerst mit E/W, UTM/MGA (55G 482345 5243567; ohne Zone gilt Zone 55 Süd) sowie Links von Google Maps, OpenStreetMap und geo:." />
+
+        <io.github.lorenzdenk.lorimaps.HelpPreference android:selectable="false" app:iconSpaceReserved="false"
+            android:title="📍 Pins"
+            android:summary="Lange auf die Karte drücken: an dieser Stelle einen Pin setzen und benennen (die Koordinaten lassen sich dabei noch ändern).\nKoordinaten eingeben oder einfügen: Kartenauswahl → ganz unten „+ Pin bei Koordinaten setzen“ (z.B. -42.96245, 146.72793 oder 42°57'44.8&quot;S 146°43'40.6&quot;E).\nPin antippen: umbenennen, verschieben oder löschen. In der Kartenauswahl stehen alle Pins; antippen springt hin." />
+
+        <io.github.lorenzdenk.lorimaps.HelpPreference android:selectable="false" app:iconSpaceReserved="false"
+            android:title="📏 Lineal (links neben den Einstellungen, nur wenn oben eingeschaltet)"
+            android:summary="Tippen: Abstand messen. Zuerst den Startpunkt antippen, danach zeigt jeder Tipp (oder Ziehen) die Luftlinie vom Startpunkt bis zu diesem Punkt. Die Karte bewegt man dabei mit zwei Fingern. Nochmals auf das Lineal tippen oder Zurück beendet die Messung.\nLange drücken: Strecke messen – mit dem Finger einem Weg entlangfahren, die Länge wird aufsummiert." />
+
+        <io.github.lorenzdenk.lorimaps.HelpPreference android:selectable="false" app:iconSpaceReserved="false"
+            android:title="＋ / − (unten rechts)"
+            android:summary="Eine Zoomstufe hinein- bzw. hinauszoomen. Die aktuelle Stufe steht klein über dem Standort-Knopf (z.B. „Z 13“)." />
+
+        <io.github.lorenzdenk.lorimaps.HelpPreference android:selectable="false" app:iconSpaceReserved="false"
+            android:title="◎ Standort (unten links)"
+            android:summary="Tippen: Karte zum aktuellen Standort verschieben, die Zoomstufe bleibt gleich.\nNochmals tippen: zurück an die vorherige Stelle (solange man die Karte dazwischen nicht verschoben hat).\nLange drücken: Standort verfolgen ein/aus – die Karte läuft dann mit." />
+
+        <io.github.lorenzdenk.lorimaps.HelpPreference android:selectable="false" app:iconSpaceReserved="false"
+            android:title="Massstab (unten)"
+            android:summary="Der Balken ist in der Mitte geteilt: Die schwarze Hälfte entspricht der halben Strecke." />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/stg_cat_about"
+        app:iconSpaceReserved="false">
+
+        <Preference android:key="License"
+            android:title="Lizenz und Entwicklung"
+            android:summary="Wer die App gebaut hat, Lizenzen und Quellen der Kartendaten"
+            app:iconSpaceReserved="false" />
+
+        <Preference android:key="About"
+            android:title="@string/stg_versions"
+            android:selectable="false"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -1,0 +1,108 @@
+<resources>
+    <!-- all texts in German (default language, independent of the phone setting) -->
+    <string name="app_name">LoriMaps</string>
+
+    <string name="stg_cat_general">Allgemein</string>
+    <string name="stg_overlay_source_title">Overlay-Quelle</string>
+    <string name="stg_show_overlay_btn_title">Overlay-Knopf anzeigen</string>
+    <string name="stg_show_overlay_btn_desc">Knopf oben rechts, der Wander- oder Velowege über die Karte legt (braucht Internet)</string>
+    <string name="stg_units">Einheiten</string>
+    <string name="stg_show_gps_title">GPS-Position anzeigen</string>
+    <string name="stg_show_gps_desc">Standortpunkt mit Genauigkeit und Richtung auf der Karte</string>
+
+    <string name="stg_cat_experimental">Weitere Optionen</string>
+    <string name="stg_cat_about">Über LoriMaps</string>
+    <string name="stg_versions">Versionen</string>
+    <string name="stg_version_lib">Kartenbibliothek</string>
+
+    <string name="toast_error_value_low">Der Wert ist zu klein</string>
+    <string name="toast_error_value_high">Der Wert ist zu gross</string>
+
+    <string name="btn_change_map_source">Karte auswählen</string>
+    <string name="btn_change_overlay_source">Tippen: Overlay ein/aus\nLange drücken: Overlay-Quelle wählen</string>
+    <string name="btn_gps">GPS-Position anzeigen</string>
+    <string name="btn_location">Tippen: zum Standort und zurück\nLange drücken: Standort verfolgen</string>
+    <string name="btn_zoom_in">Hineinzoomen</string>
+    <string name="btn_zoom_out">Hinauszoomen</string>
+    <string name="btn_settings">Tippen: Einstellungen\nLange drücken: Lineal-Knopf ein/aus</string>
+    <string name="btn_debug_info">Debug-Info</string>
+    <string name="btn_ruler">Tippen: Abstand messen\nLange drücken: Strecke abfahren\nMit zwei Fingern Karte bewegen</string>
+
+    <string name="toast_follow_loc_1">Standort wird verfolgt</string>
+    <string name="toast_follow_loc_0">Standort wird nicht mehr verfolgt</string>
+
+    <string name="toast_loc_not_avail1">Standort ist noch nicht bekannt</string>
+    <string name="toast_loc_not_avail2">Standort ist nicht verfügbar</string>
+
+    <string name="dlg_deny_loc_perm_title">Keine Standort-Berechtigung</string>
+    <string name="dlg_deny_loc_perm_message">Ohne Standort-Berechtigung kann die App deine Position nicht anzeigen. Erlaube den Zugriff beim nächsten Mal, wenn du diese Funktion brauchst.</string>
+    <string name="dlg_permanent_deny_loc_perm_message">Ohne Standort-Berechtigung kann die App deine Position nicht anzeigen. Du kannst sie in den Android-Einstellungen der App erlauben.</string>
+    <string name="btn_ok">OK</string>
+    <string name="title_settings">Einstellungen</string>
+    <string name="toast_location_service_disabled">Standortdienst ist ausgeschaltet</string>
+
+    <string name="unit_meter">m</string>
+    <string name="unit_km">km</string>
+    <string name="unit_mile">mi</string>
+    <string name="unit_yard">yd</string>
+    <string name="rulerStart">Startpunkt antippen</string>
+
+    <string name="dlg_select_map_source_title">Quelle auswählen</string>
+    <string name="dlg_select_overlay_source_title">Overlay auswählen</string>
+
+    <!-- map chooser -->
+    <string name="dlg_select_map_title">Karte auswählen</string>
+    <string name="header_offline_maps">Offline-Karten</string>
+    <string name="header_online_maps">Online-Karten</string>
+    <string name="header_overlays">Offline-Overlays</string>
+    <string name="overlay_offline_suffix">(offline)</string>
+    <string name="overlay_online_suffix">(online)</string>
+    <string name="overlay_none">Kein Overlay</string>
+    <string name="btn_add_map">+ Karte / GPX</string>
+    <string name="dlg_rename_title">Karte umbenennen</string>
+    <string name="hint_no_offline_maps">Noch keine Offline-Karten. Mit \"+ Karte / GPX\" eine .mbtiles-Datei importieren.</string>
+
+    <!-- offline maps -->
+    <string name="menu_offline_maps">Offline-Karten…</string>
+    <string name="dlg_offline_maps_title">Offline-Karten</string>
+    <string name="menu_offline_import">+ Kartendatei importieren (.mbtiles, .sqlite, .zip, .gemf)…</string>
+    <string name="menu_offline_delete">Karte löschen…</string>
+    <string name="menu_offline_folder">Wo liegen die Karten?</string>
+    <string name="dlg_offline_folder_message">Offline-Karten liegen hier:\n\n%1$s\n\nMan kann Kartendateien auch per USB in diesen Ordner kopieren.\n\nOffline-Karten brauchen kein Internet. Über die genaueste Zoomstufe einer Karte hinaus werden die Kacheln vergrössert.</string>
+    <string name="dlg_offline_delete_title">Offline-Karte löschen</string>
+    <string name="dlg_offline_delete_confirm">\"%1$s\" von diesem Gerät löschen?</string>
+    <string name="dlg_offline_import_title">Karte wird importiert…</string>
+    <string name="btn_delete">Löschen</string>
+    <string name="btn_cancel">Abbrechen</string>
+    <string name="toast_offline_imported">Karte importiert: %1$s</string>
+    <string name="toast_offline_import_failed">Import fehlgeschlagen: %1$s</string>
+    <string name="toast_offline_unsupported">Dateityp nicht unterstützt. Bitte .mbtiles, .sqlite, .zip, .gemf oder .gpx verwenden</string>
+    <string name="toast_offline_no_space">Nicht genug Speicherplatz (%1$s benötigt)</string>
+    <string name="toast_offline_open_failed">Offline-Karte kann nicht geöffnet werden: %1$s</string>
+    <string name="header_pins">Pins</string>
+    <string name="pin_new_title">Pin setzen</string>
+    <string name="pin_edit_title">Pin bearbeiten</string>
+    <string name="pin_name_hint">Name (optional)</string>
+    <string name="pin_coordinates_label">Koordinaten (Breite, Länge)</string>
+    <string name="pin_coordinates_hint">z.B. -42.96245, 146.72793</string>
+    <string name="pin_coordinates_invalid">Koordinaten nicht lesbar. Beispiele: -42.96245, 146.72793 oder 42°57\'44.8\"S 146°43\'40.6\"E</string>
+    <string name="pin_add_coordinates">+ Pin bei Koordinaten setzen</string>
+    <string name="pin_add_hint">oder lange auf die Karte drücken</string>
+    <string name="overlay_list_hint">Häkchen = anzeigen. Oben in der Liste = obenauf. Mit ▲ ▼ die Reihenfolge ändern, mit dem Regler die Deckkraft.</string>
+    <string name="overlay_kind_offline">Offline-Overlay</string>
+    <string name="overlay_kind_gpx">GPX</string>
+    <string name="overlay_kind_online">online (braucht Internet)</string>
+    <string name="overlay_opacity_label">Deckkraft %d %%</string>
+    <string name="search_title">Koordinaten suchen</string>
+    <string name="search_hint">Koordinaten eingeben oder einfügen</string>
+    <string name="search_go">Suchen</string>
+    <string name="search_not_readable">Koordinaten nicht lesbar</string>
+    <string name="search_formats">Zum Beispiel: -42.96245, 146.72793 · 42.96245 S 146.72793 E · 42°57\'44.8\"S 146°43\'40.6\"E · 42°57.747\'S 146°43.676\'E · 42 57 44.8 S 146 43 40.6 E · UTM/MGA 55G 482345 5243567 · Links von Google Maps, OpenStreetMap, geo:</string>
+    <string name="search_point_title">Suchpunkt</string>
+    <string name="search_save_pin">Als Pin speichern</string>
+    <string name="search_remove">Entfernen</string>
+    <string name="rulerStartSet">Start gesetzt – Ziel antippen</string>
+    <string name="toast_go_to">Gehe zu %1$s</string>
+    <string name="toast_place_not_found">Ort „%1$s“ nicht gefunden</string>
+    <string name="toast_place_search_failed">Fehler bei der Ortssuche</string>
+</resources>

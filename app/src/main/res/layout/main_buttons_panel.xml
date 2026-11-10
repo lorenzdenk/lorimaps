@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- top right: settings, below it the map chooser (and the optional overlay button) -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainButtons"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="end"
+    android:layout_alignParentRight="true"
+    android:layout_alignParentEnd="true"
+    android:layout_alignParentTop="true"
+    android:layout_margin="@dimen/screenMargin"
+    tools:showIn="@layout/activity_main">
+
+    <include
+        layout="@layout/collapsable_panel"
+        android:id="@+id/collapsiblePanel" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/btnChangeSource"
+        style="@style/RoundMapButton"
+        android:layout_marginTop="@dimen/roundBtnGap"
+        android:src="@drawable/ic_map_usual"
+        android:contentDescription="@string/btn_change_map_source" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/btnOverlay"
+        style="@style/RoundMapButton"
+        android:layout_marginTop="@dimen/roundBtnGap"
+        android:src="@drawable/ic_overlay_off"
+        android:contentDescription="@string/btn_change_overlay_source" />
+
+    <!-- GPS on/off is now a setting; the button stays hidden for the state icons in the code -->
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/btnGPS"
+        style="@style/RoundMapButton"
+        android:src="@drawable/ic_gps_off"
+        android:visibility="gone"
+        android:contentDescription="@string/btn_gps" />
+
+</LinearLayout>

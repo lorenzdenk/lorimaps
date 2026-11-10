@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="btnPadding">12dp</dimen>
+    <dimen name="zoomBtnHeigth">72dp</dimen>
+    <dimen name="zoomBtnWidth">48dp</dimen>
+    <!-- round map buttons -->
+    <dimen name="roundBtn">52dp</dimen>
+    <dimen name="roundBtnPadding">13dp</dimen>
+    <dimen name="roundBtnGap">10dp</dimen>
+    <dimen name="screenMargin">12dp</dimen>
+    <dimen name="scaleBarHeight">40dp</dimen>
+</resources>

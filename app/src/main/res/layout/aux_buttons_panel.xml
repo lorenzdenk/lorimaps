@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- bottom right: zoom buttons, above the scale bar -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/auxPanel"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:layout_alignParentRight="true"
+    android:layout_alignParentEnd="true"
+    android:layout_alignParentBottom="true"
+    android:layout_marginEnd="@dimen/screenMargin"
+    android:layout_marginRight="@dimen/screenMargin"
+    android:layout_marginBottom="84dp"
+    tools:showIn="@layout/activity_main">
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/btnZoomIn"
+        style="@style/RoundMapButton"
+        android:src="@drawable/ic_zoom_in"
+        android:contentDescription="@string/btn_zoom_in" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/btnZoomOut"
+        style="@style/RoundMapButton"
+        android:layout_marginTop="@dimen/roundBtnGap"
+        android:src="@drawable/ic_zoom_out"
+        android:contentDescription="@string/btn_zoom_out" />
+
+    <!-- exact zoom value, debug only -->
+    <TextView
+        android:id="@+id/tvZoom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+</LinearLayout>

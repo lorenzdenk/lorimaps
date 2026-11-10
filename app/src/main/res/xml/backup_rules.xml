@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 11 and lower: keep large offline map files out of Auto Backup (25 MB quota) -->
+<full-backup-content>
+    <exclude domain="external" path="maps/" />
+</full-backup-content>

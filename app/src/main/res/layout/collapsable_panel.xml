@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    tools:showIn="@layout/main_buttons_panel">
+
+    <!-- coordinate search (magnifier) -->
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/btnSearch"
+        style="@style/RoundMapButton"
+        android:layout_marginEnd="@dimen/roundBtnGap"
+        android:src="@drawable/ic_search"
+        android:contentDescription="@string/search_title" />
+
+    <!-- ruler: shown with a long tap on settings -->
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/btnRuler"
+        style="@style/RoundMapButton"
+        android:layout_marginEnd="@dimen/roundBtnGap"
+        android:src="@drawable/ic_ruler_off"
+        android:contentDescription="@string/btn_ruler" />
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/btnSettings"
+        style="@style/RoundMapButton"
+        android:src="@drawable/ic_settings"
+        android:contentDescription="@string/btn_settings" />
+
+</LinearLayout>
