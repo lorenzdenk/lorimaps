@@ -2,8 +2,11 @@ package io.github.lorenzdenk.lorimaps;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -68,6 +71,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -110,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
 
     private EnhancedSharedPreferences prefs;
     private MapsCatalog mapsCatalog;
+    private OfflineMaps offlineMaps;
     private PinManager pins;
     private LocationMarker locationMarker;
     private final RulerLayer ruler = new RulerLayer();
@@ -198,7 +203,10 @@ public class MainActivity extends AppCompatActivity {
         overlayView.addLayer(locationMarker);
         binding.scaleBar.setMap(overlayView);
 
-        mapsCatalog = new MapsCatalog(prefs, this::applyMap, this::applyOverlays);
+        offlineMaps = new OfflineMaps(this, prefs);
+        offlineMaps.scan();
+        mapsCatalog = new MapsCatalog(prefs, offlineMaps, () -> importLauncher.launch(new String[]{"*/*"}),
+                this::applyMap, this::applyOverlays);
         mapsCatalog.setPins(pins, this::jump);
 
         userTouchSurface.setCallback(new TwoFingerDrag(getBaseContext(), new TwoFingerDrag.Listener() {
@@ -352,6 +360,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         mapView.onStart();
+        ContextCompat.registerReceiver(this, downloadReceiver, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+                ContextCompat.RECEIVER_EXPORTED);
+        checkDownloads();
     }
 
     @Override
@@ -385,6 +396,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         mapView.onStop();
+        try { unregisterReceiver(downloadReceiver); } catch (Exception ignored) { }
     }
 
     @Override
@@ -457,22 +469,35 @@ public class MainActivity extends AppCompatActivity {
     /** MapLibre style with one raster layer for an online raster map */
     private String rasterStyle(MapSource source) {
         try {
-            JSONObject src = new JSONObject()
-                    .put("type", "raster")
-                    .put("tiles", new JSONArray(jsonArray(source.tileUrls, urlSuffix(source))))
-                    .put("tileSize", tileDisplaySize(source))
-                    .put("minzoom", source.minZoom)
-                    .put("maxzoom", source.maxZoom)
-                    .put("attribution", source.attribution);
+            JSONObject sources = new JSONObject();
             JSONArray layers = new JSONArray()
                     .put(new JSONObject().put("id", "background").put("type", "background")
-                            .put("paint", new JSONObject().put("background-color", "#e6e6e6")))
-                    .put(new JSONObject().put("id", "base").put("type", "raster").put("source", "base")
-                            .put("paint", new JSONObject().put("raster-fade-duration", 100)));
+                            .put("paint", new JSONObject().put("background-color", "#e6e6e6")));
+            if (source.isOffline()) {
+                // MBTiles file(s) read by MapLibre itself (mbtiles://, no network); a map in several files: one layer each
+                int i = 0;
+                for (java.io.File f : offlineMaps.files(source)) {
+                    String id = "base" + (i++ == 0 ? "" : "-" + i);
+                    sources.put(id, new JSONObject().put("type", "raster").put("url", "mbtiles://" + f.getAbsolutePath())
+                            .put("tileSize", tileDisplaySize(source)));
+                    layers.put(new JSONObject().put("id", id).put("type", "raster").put("source", id)
+                            .put("paint", new JSONObject().put("raster-fade-duration", 0)));
+                }
+            } else {
+                sources.put("base", new JSONObject()
+                        .put("type", "raster")
+                        .put("tiles", new JSONArray(jsonArray(source.tileUrls, urlSuffix(source))))
+                        .put("tileSize", tileDisplaySize(source))
+                        .put("minzoom", source.minZoom)
+                        .put("maxzoom", source.maxZoom)
+                        .put("attribution", source.attribution));
+                layers.put(new JSONObject().put("id", "base").put("type", "raster").put("source", "base")
+                        .put("paint", new JSONObject().put("raster-fade-duration", 100)));
+            }
             return new JSONObject()
                     .put("version", 8)
                     .put("name", source.name)
-                    .put("sources", new JSONObject().put("base", src))
+                    .put("sources", sources)
                     .put("layers", layers)
                     .toString();
         } catch (Exception e) {
@@ -487,16 +512,30 @@ public class MainActivity extends AppCompatActivity {
             currentSource = source;
             return;
         }
+        Style.Builder builder;
+        try {
+            if (source.styleDir != null) // offline vector map: style with the files of this device
+                builder = new Style.Builder().fromUri(Uri.fromFile(offlineMaps.deviceStyle(source)).toString());
+            else if (source.isVector())
+                builder = new Style.Builder().fromUri(source.styleUrl);
+            else
+                builder = new Style.Builder().fromJson(rasterStyle(source));
+        } catch (Exception e) {
+            Log.e("LoriMaps", "map " + source.name + ": " + e);
+            Toast.makeText(this, getString(R.string.toast_offline_open_failed, e.getMessage()), Toast.LENGTH_LONG).show();
+            if (source != MapsCatalog.MAPS[0]) applyMap(MapsCatalog.MAPS[0]);
+            return;
+        }
+        boolean newMap = !source.key().equals(currentSource.key());
         // the same level before and after, also when the zoom grid changes (map size, raster / vector)
         double level = Math.round(levelOfZoom(map.getCameraPosition().zoom));
         currentSource = source;
         map.setMaxZoomPreference(zoomOfLevel(22)); // beyond the last level of a map its tiles are enlarged
         map.moveCamera(CameraUpdateFactory.zoomTo(zoomOfLevel(level)));
+        if (newMap && source.isOffline())
+            jumpIntoMap(source);
 
         style = null;
-        Style.Builder builder = source.isVector()
-                ? new Style.Builder().fromUri(source.styleUrl)
-                : new Style.Builder().fromJson(rasterStyle(source));
         map.setStyle(builder, loaded -> {
             style = loaded;
             addOverlayLayers();
@@ -525,6 +564,17 @@ public class MainActivity extends AppCompatActivity {
                 String id = "overlay-" + (i++);
                 String[] urls = new String[o.source.tileUrls.length];
                 for (int k = 0; k < urls.length; k++) urls[k] = o.source.tileUrls[k] + urlSuffix(o.source);
+                if (o.source.isOffline()) { // MBTiles file(s) on the device
+                    int part = 0;
+                    for (java.io.File f : offlineMaps.files(o.source)) {
+                        String pid = part++ == 0 ? id : id + "-" + part;
+                        s.addSource(new RasterSource(pid, "mbtiles://" + f.getAbsolutePath(), tileDisplaySize(o.source)));
+                        RasterLayer layer = new RasterLayer(pid, pid);
+                        layer.setProperties(PropertyFactory.rasterOpacity(o.opacity), PropertyFactory.rasterFadeDuration(0f));
+                        s.addLayer(layer);
+                    }
+                    continue;
+                }
                 TileSet tiles = new TileSet("2.2.0", urls);
                 tiles.setMinZoom(o.source.minZoom);
                 tiles.setMaxZoom(o.source.maxZoom);
@@ -537,6 +587,105 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.e("LoriMaps", "overlays: " + e);
         }
+    }
+
+    /** A newly chosen offline map whose area is not on the screen: jump to its middle (the zoom level stays). */
+    private void jumpIntoMap(MapSource source) {
+        double[] b = offlineMaps.bounds(source);
+        if (b == null || map == null) return;
+        LatLng c = map.getCameraPosition().target;
+        if (c != null && c.getLongitude() >= b[0] && c.getLongitude() <= b[2] && c.getLatitude() >= b[1] && c.getLatitude() <= b[3])
+            return;
+        jump(new LatLng((b[1] + b[3]) / 2, (b[0] + b[2]) / 2));
+    }
+
+    // ------------------------------------------------------------------ offline maps: import and download
+
+    /** document picker: one or more map files (MBTiles, style package .zip) */
+    private final ActivityResultLauncher<String[]> importLauncher = registerForActivityResult(
+            new ActivityResultContracts.OpenMultipleDocuments(), uris -> {
+                if (uris != null && !uris.isEmpty()) importOfflineMaps(uris);
+            });
+
+    private void importOfflineMaps(List<Uri> uris) {
+        AtomicBoolean cancel = new AtomicBoolean(false);
+        android.widget.ProgressBar progress = new android.widget.ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+        progress.setIndeterminate(true);
+        progress.setMax(1000);
+        TextView label = new TextView(this);
+        android.widget.LinearLayout layout = new android.widget.LinearLayout(this);
+        layout.setOrientation(android.widget.LinearLayout.VERTICAL);
+        int pad = (int) (20 * getResources().getDisplayMetrics().density);
+        layout.setPadding(pad, pad / 2, pad, 0);
+        layout.addView(progress);
+        layout.addView(label);
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle(R.string.dlg_offline_import_title)
+                .setView(layout)
+                .setCancelable(false)
+                .setNegativeButton(R.string.btn_cancel, (d, w) -> cancel.set(true))
+                .show();
+
+        offlineMaps.importFiles(uris, cancel, new OfflineMaps.ImportListener() {
+            @Override
+            public void onProgress(long copied, long total) {
+                String done = android.text.format.Formatter.formatShortFileSize(MainActivity.this, copied);
+                if (total > 0) {
+                    progress.setIndeterminate(false);
+                    progress.setProgress((int) (copied * 1000 / total));
+                    label.setText(done + " / " + android.text.format.Formatter.formatShortFileSize(MainActivity.this, total));
+                } else {
+                    label.setText(done);
+                }
+            }
+
+            @Override
+            public void onDone(List<String> names, @Nullable String error) {
+                if (dialog.isShowing()) dialog.dismiss();
+                if (error != null)
+                    Toast.makeText(MainActivity.this, error, Toast.LENGTH_LONG).show();
+                if (names.isEmpty()) return;
+                if (error == null)
+                    Toast.makeText(MainActivity.this, getString(R.string.toast_offline_imported, android.text.TextUtils.join(", ", names)),
+                            Toast.LENGTH_LONG).show();
+                mapsCatalog.offlineChanged(mapKeyOf(names));
+            }
+        });
+    }
+
+    /** key of the (first) map among imported or downloaded files, to show it at once */
+    @Nullable
+    private String mapKeyOf(List<String> names) {
+        for (MapSource m : offlineMaps.maps())
+            if (m.file != null) {
+                String base = m.styleDir != null ? m.file.getName().replace("-vector.mbtiles", "") : null;
+                for (String n : names)
+                    if (n.equals(m.file.getName()) || base != null && n.startsWith(base + "-"))
+                        return m.key();
+            }
+        return null;
+    }
+
+    private final BroadcastReceiver downloadReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            checkDownloads();
+        }
+    };
+
+    /** downloads that finished: put them in place and show the new map */
+    private void checkDownloads() {
+        if (offlineMaps == null) return;
+        offlineMaps.checkDownloads((ready, errors) -> {
+            for (String r : errors)
+                Toast.makeText(this, getString(R.string.toast_download_failed, r), Toast.LENGTH_LONG).show();
+            String key = null;
+            for (String r : ready) {
+                Toast.makeText(this, getString(R.string.toast_download_done, r), Toast.LENGTH_LONG).show();
+                if (key == null) key = mapKeyOf(java.util.Collections.singletonList(r + "-vector.mbtiles"));
+            }
+            if (map != null) mapsCatalog.offlineChanged(key);
+        });
     }
 
     // ------------------------------------------------------------------ zoom

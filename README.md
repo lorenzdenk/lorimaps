@@ -9,7 +9,8 @@ Dies ist die neue Version auf Basis von **MapLibre Native**: Der Kartenrenderer 
 
 ## Stand
 
-Erster Schritt des Umbaus: die App läuft mit MapLibre und zeigt die bisherigen **Online-Karten**.
+Die App läuft mit MapLibre, zeigt die bisherigen **Online-Karten** und **Offline-Karten** – Vektorkarten von
+[lorimaps-vector-render](https://github.com/lorenzdenk/lorimaps-vector-render) und Rasterkarten (MBTiles).
 
 | Funktion | Stand |
 |---|---|
@@ -19,7 +20,9 @@ Erster Schritt des Umbaus: die App läuft mit MapLibre und zeigt die bisherigen 
 | GPS-Standort mit Genauigkeitskreis und Kompass-Kegel, Verfolgen, Sprung hin und zurück | übernommen |
 | Zoom in ganzen Stufen (Knöpfe und Finger), Stufenanzeige, Kartengrösse | übernommen |
 | Massstab, Lineal, Pins, Koordinatensuche, Richtungspfeil am Rand, `geo:`-Links | übernommen |
-| Offline-Karten (MBTiles), GPX-Overlays | **noch nicht** – folgt mit den Vektor-Offline-Karten |
+| Offline-Vektorkarten (lorimaps-vector-render): importieren oder direkt aus dem neuesten Release herunterladen | neu |
+| Offline-Rasterkarten und -Overlays (MBTiles, auch in mehreren Teilen), löschen | übernommen |
+| GPX-Overlays | **noch nicht** |
 | Einstellung „Beim Zoomen mit zwei Fingern“ | entfällt (MapLibre zeigt zwischen zwei Stufen die nähere) |
 
 ## Installieren
@@ -34,10 +37,21 @@ als Update über eine vorhandene Installation installieren. Die App hat eine eig
 `gradle assembleDebug` mit Gradle 8.13 und Java 17 (oder den Ordner in Android Studio öffnen);
 die APK liegt danach in `app/build/outputs/apk/debug/`.
 
+## Offline-Karten
+
+Kartenmenü → *Offline-Karte herunterladen* zeigt die Karten des neuesten Releases von lorimaps-vector-render;
+der Download läuft im Hintergrund (Android-Downloadmanager), danach erscheint die Karte unter *Offline-Karten*.
+Oder Dateien mit *Kartendateien importieren* auswählen bzw. per USB in den Ordner `Android/data/io.github.lorenzdenk.lorimaps/files/maps`
+kopieren. Eine Vektorkarte besteht aus `<name>-vector.mbtiles` und `<name>-style.zip` (Stil, Symbole, Schriften),
+dazu wahlweise `<name>-hillshade.mbtiles` und `<name>-relief.mbtiles`. Die App entpackt den Stil und lenkt seine
+Platzhalter `lorimaps://…` auf die Dateien (`mbtiles://`, `file://`, von MapLibre selbst gelesen – kein Internet nötig).
+Rasterkarten sind einzelne `.mbtiles`-Dateien; solche mit `type = overlay` erscheinen in der Overlay-Liste.
+
 ## Code-Übersicht
 
 - `MainActivity.java` – Karte (MapLibre), Knöpfe, Zoomstufen, Standort, Lineal
-- `MapsCatalog.java`, `MapSource.java` – Karten und Overlays, Kartenmenü, Overlay-Liste
+- `MapsCatalog.java`, `MapSource.java` – Karten und Overlays, Kartenmenü, Overlay-Liste, Download-Auswahl
+- `OfflineMaps.java` – Offline-Karten: Ordner lesen, Stilpaket entpacken und auf die Dateien umschreiben, Import, Download, Löschen
 - `MapOverlayView.java` – durchsichtige Ansicht über der Karte, auf die die App selbst zeichnet
 - `LocationMarker.java` – Standort (GPS/Netz), Kompass, Standortpunkt
 - `PinManager.java`, `CoordinateParser.java` – Pins und Koordinatensuche

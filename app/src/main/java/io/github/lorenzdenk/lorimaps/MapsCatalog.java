@@ -10,7 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The maps and overlays of the app (for now online only), the map menu and the overlay list.
+ * The maps and overlays of the app (offline maps on the device, see OfflineMaps, and online maps),
+ * the map menu with the offline functions (import, download, delete) and the overlay list.
  * What is shown is stored in the settings; the map itself is set through the two callbacks.
  */
 public class MapsCatalog {
@@ -76,14 +77,24 @@ public class MapsCatalog {
         void set(List<ShownOverlay> overlays);
     }
 
+    /** asks the activity to open the document picker for importing map files */
+    public interface CallbackImport {
+        void pick();
+    }
+
     private final SharedPreferences prefs;
+    private final OfflineMaps offline;
+    private final CallbackImport requestImport;
     private final CallbackSetMap setMap;
     private final CallbackOverlays setOverlays;
     @Nullable private PinManager pins;
     @Nullable private PinManager.JumpCallback pinJump;
 
-    public MapsCatalog(SharedPreferences prefs, CallbackSetMap setMap, CallbackOverlays setOverlays) {
+    public MapsCatalog(SharedPreferences prefs, OfflineMaps offline, CallbackImport requestImport,
+                       CallbackSetMap setMap, CallbackOverlays setOverlays) {
         this.prefs = prefs;
+        this.offline = offline;
+        this.requestImport = requestImport;
         this.setMap = setMap;
         this.setOverlays = setOverlays;
     }
@@ -96,11 +107,29 @@ public class MapsCatalog {
 
     // ------------------------------------------------------------------ maps
 
+    /** offline maps first, then the online maps */
+    public List<MapSource> allMaps() {
+        List<MapSource> all = new ArrayList<>(offline.maps());
+        all.addAll(java.util.Arrays.asList(MAPS));
+        return all;
+    }
+
     public MapSource currentMap() {
         String key = prefs.getString(PREF_MAP, "");
-        for (MapSource m : MAPS)
+        for (MapSource m : allMaps())
             if (m.key().equals(key)) return m;
         return MAPS[0];
+    }
+
+    /** After maps were imported, downloaded or deleted: shows the stored map again if it changed or is gone. */
+    public void offlineChanged(@Nullable String selectKey) {
+        if (selectKey != null)
+            for (MapSource m : allMaps())
+                if (m.key().equals(selectKey)) {
+                    select(m);
+                    return;
+                }
+        load();
     }
 
     /** Shows the stored map and overlays (start of the app, after the settings). */
@@ -109,7 +138,7 @@ public class MapsCatalog {
         applyOverlays();
     }
 
-    private void select(MapSource m) {
+    public void select(MapSource m) {
         prefs.edit().putString(PREF_MAP, m.key()).apply();
         setMap.set(m);
         applyOverlays();
@@ -136,6 +165,30 @@ public class MapsCatalog {
                 .create();
 
         MapSource current = currentMap();
+        addHeader(list, context.getString(R.string.header_offline_maps), dp);
+        List<MapSource> offlineMaps = offline.maps();
+        if (offlineMaps.isEmpty()) {
+            android.widget.TextView hint = new android.widget.TextView(context);
+            hint.setText(R.string.hint_no_offline_maps);
+            hint.setTextSize(13);
+            hint.setAlpha(0.6f);
+            hint.setPadding((int) (24 * dp), (int) (2 * dp), (int) (24 * dp), (int) (4 * dp));
+            list.addView(hint);
+        }
+        for (MapSource m : offlineMaps)
+            addMapRow(list, dialog, m, m.key().equals(current.key()), dp);
+        addActionRow(list, context.getString(R.string.menu_offline_import), context.getString(R.string.offline_import_hint), dp,
+                () -> { dialog.dismiss(); requestImport.pick(); }, null);
+        addActionRow(list, context.getString(R.string.menu_offline_download),
+                context.getString(offline.downloading() ? R.string.offline_download_running : R.string.offline_download_hint), dp,
+                () -> { dialog.dismiss(); showDownloadDialog(context); }, null);
+        addActionRow(list, context.getString(R.string.menu_offline_folder), "", dp,
+                () -> new AlertDialog.Builder(context)
+                        .setTitle(R.string.dlg_offline_maps_title)
+                        .setMessage(context.getString(R.string.dlg_offline_folder_message, offline.dir.getAbsolutePath()))
+                        .setPositiveButton(R.string.btn_ok, null)
+                        .show(), null);
+
         addHeader(list, context.getString(R.string.header_online_maps), dp);
         for (MapSource m : MAPS)
             addMapRow(list, dialog, m, m == current, dp);
@@ -271,7 +324,7 @@ public class MapsCatalog {
         frame.setPadding((int) (20 * dp), (int) (8 * dp), (int) (20 * dp), 0);
         frame.addView(input);
 
-        AlertDialog dialog = new AlertDialog.Builder(context)
+        AlertDialog.Builder builder = new AlertDialog.Builder(context)
                 .setTitle(R.string.dlg_rename_title)
                 .setView(frame)
                 .setPositiveButton(R.string.btn_ok, (d, w) -> {
@@ -282,8 +335,10 @@ public class MapsCatalog {
                         prefs.edit().putString("mapName_" + m.key(), text).apply();
                     showMapMenu(context);
                 })
-                .setNegativeButton(R.string.btn_cancel, (d, w) -> showMapMenu(context))
-                .create();
+                .setNegativeButton(R.string.btn_cancel, (d, w) -> showMapMenu(context));
+        if (m.isOffline())
+            builder.setNeutralButton(R.string.btn_delete, (d, w) -> confirmDelete(context, m));
+        AlertDialog dialog = builder.create();
         dialog.setOnShowListener(d -> {
             input.requestFocus();
             if (dialog.getWindow() != null)
@@ -294,9 +349,16 @@ public class MapsCatalog {
 
     // ------------------------------------------------------------------ overlays (several at once)
 
+    /** offline overlays (MBTiles with type = overlay) first, then the online ones */
+    private List<MapSource> allOverlays() {
+        List<MapSource> all = new ArrayList<>(offline.overlays());
+        all.addAll(java.util.Arrays.asList(OVERLAYS));
+        return all;
+    }
+
     @Nullable
-    private static MapSource overlay(String key) {
-        for (MapSource o : OVERLAYS)
+    private MapSource overlay(String key) {
+        for (MapSource o : allOverlays())
             if (o.key().equals(key)) return o;
         return null;
     }
@@ -330,7 +392,7 @@ public class MapsCatalog {
         List<String> order = new ArrayList<>();
         for (String k : split(prefs.getString(PREF_OVERLAY_ORDER, "")))
             if (overlay(k) != null) order.add(k);
-        for (MapSource o : OVERLAYS)
+        for (MapSource o : allOverlays())
             if (!order.contains(o.key())) order.add(o.key());
         return order;
     }
@@ -387,7 +449,7 @@ public class MapsCatalog {
         for (String k : split(prefs.getString(PREF_LAST_OVERLAYS, "")))
             if (overlay(k) != null) last.add(k);
         if (last.isEmpty())
-            last.add(OVERLAYS[0].key());
+            last.add(allOverlays().get(0).key());
         setShown(last);
     }
 
@@ -444,11 +506,12 @@ public class MapsCatalog {
             android.widget.LinearLayout texts = new android.widget.LinearLayout(context);
             texts.setOrientation(android.widget.LinearLayout.VERTICAL);
             android.widget.TextView title = new android.widget.TextView(context);
-            title.setText(key.substring(key.indexOf(':') + 1));
+            MapSource source = overlay(key);
+            title.setText(source != null ? source.name : key.substring(key.indexOf(':') + 1));
             title.setTextSize(16);
             texts.addView(title);
             android.widget.TextView kind = new android.widget.TextView(context);
-            kind.setText(R.string.overlay_kind_online);
+            kind.setText(source != null && source.isOffline() ? R.string.overlay_kind_offline : R.string.overlay_kind_online);
             kind.setTextSize(12);
             kind.setAlpha(0.6f);
             texts.addView(kind);
@@ -486,6 +549,80 @@ public class MapsCatalog {
                 list.addView(op);
             }
         }
+    }
+
+    // ------------------------------------------------------------------ offline: delete, download
+
+    private void confirmDelete(Context context, MapSource m) {
+        new AlertDialog.Builder(context)
+                .setTitle(R.string.dlg_offline_delete_title)
+                .setMessage(context.getString(R.string.dlg_offline_delete_confirm, displayName(m)))
+                .setPositiveButton(R.string.btn_delete, (d, w) -> {
+                    boolean shown = m.key().equals(currentMap().key());
+                    offline.delete(m);
+                    prefs.edit().remove("mapName_" + m.key()).apply();
+                    if (shown) prefs.edit().remove(PREF_MAP).apply();
+                    load();
+                    showMapMenu(context);
+                })
+                .setNegativeButton(R.string.btn_cancel, (d, w) -> showMapMenu(context))
+                .show();
+    }
+
+    /** The maps of the newest release of lorimaps-vector-render; tap one to download it. */
+    public void showDownloadDialog(Context context) {
+        float dp = context.getResources().getDisplayMetrics().density;
+        android.widget.LinearLayout list = new android.widget.LinearLayout(context);
+        list.setOrientation(android.widget.LinearLayout.VERTICAL);
+        list.setPadding(0, (int) (4 * dp), 0, (int) (4 * dp));
+        android.widget.ScrollView scroll = new android.widget.ScrollView(context);
+        scroll.addView(list);
+        android.widget.TextView status = new android.widget.TextView(context);
+        status.setText(R.string.dlg_download_loading);
+        status.setPadding((int) (24 * dp), (int) (8 * dp), (int) (24 * dp), (int) (8 * dp));
+        list.addView(status);
+        AlertDialog dialog = new AlertDialog.Builder(context)
+                .setTitle(R.string.dlg_download_title)
+                .setView(scroll)
+                .setNegativeButton(R.string.btn_cancel, null)
+                .show();
+        android.os.Handler main = new android.os.Handler(android.os.Looper.getMainLooper());
+        java.util.concurrent.Executors.newSingleThreadExecutor().execute(() -> {
+            try {
+                List<OfflineMaps.Region> regions = offline.fetchRegions();
+                main.post(() -> {
+                    if (!dialog.isShowing()) return;
+                    if (regions.isEmpty()) {
+                        status.setText(R.string.dlg_download_none);
+                        return;
+                    }
+                    status.setText(context.getString(R.string.dlg_download_hint, regions.get(0).release));
+                    for (OfflineMaps.Region r : regions) {
+                        String size = android.text.format.Formatter.formatShortFileSize(context, r.size);
+                        addActionRow(list, r.name, size + ", " + r.assets.size() + " Dateien", dp, () -> {
+                            dialog.dismiss();
+                            new AlertDialog.Builder(context)
+                                    .setTitle(R.string.dlg_download_title)
+                                    .setMessage(context.getString(R.string.dlg_download_confirm, r.name, size))
+                                    .setPositiveButton(R.string.btn_download, (d, w) -> {
+                                        try {
+                                            offline.download(r);
+                                            android.widget.Toast.makeText(context, context.getString(R.string.toast_download_started, r.name),
+                                                    android.widget.Toast.LENGTH_LONG).show();
+                                        } catch (Exception e) {
+                                            android.widget.Toast.makeText(context, context.getString(R.string.toast_download_failed, e.getMessage()),
+                                                    android.widget.Toast.LENGTH_LONG).show();
+                                        }
+                                    })
+                                    .setNegativeButton(R.string.btn_cancel, null)
+                                    .show();
+                        }, null);
+                    }
+                });
+            } catch (Exception e) {
+                main.post(() -> status.setText(context.getString(R.string.dlg_download_failed, String.valueOf(e.getMessage()))));
+            }
+        });
     }
 
     private android.view.View arrow(Context context, String text, boolean enabled, float dp, Runnable action) {

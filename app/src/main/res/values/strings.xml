@@ -5,7 +5,7 @@
     <string name="stg_cat_general">Allgemein</string>
     <string name="stg_overlay_source_title">Overlay-Quelle</string>
     <string name="stg_show_overlay_btn_title">Overlay-Knopf anzeigen</string>
-    <string name="stg_show_overlay_btn_desc">Knopf oben rechts, der Wander- oder Velowege über die Karte legt (braucht Internet)</string>
+    <string name="stg_show_overlay_btn_desc">Knopf oben rechts, der Overlays über die Karte legt: Wander- oder Velowege (online) und Offline-Overlays</string>
     <string name="stg_units">Einheiten</string>
     <string name="stg_show_gps_title">GPS-Position anzeigen</string>
     <string name="stg_show_gps_desc">Standortpunkt mit Genauigkeit und Richtung auf der Karte</string>
@@ -60,15 +60,15 @@
     <string name="overlay_none">Kein Overlay</string>
     <string name="btn_add_map">+ Karte / GPX</string>
     <string name="dlg_rename_title">Karte umbenennen</string>
-    <string name="hint_no_offline_maps">Noch keine Offline-Karten. Mit \"+ Karte / GPX\" eine .mbtiles-Datei importieren.</string>
+    <string name="hint_no_offline_maps">Noch keine Offline-Karten. Karte herunterladen oder Kartendateien importieren.</string>
 
     <!-- offline maps -->
     <string name="menu_offline_maps">Offline-Karten…</string>
     <string name="dlg_offline_maps_title">Offline-Karten</string>
-    <string name="menu_offline_import">+ Kartendatei importieren (.mbtiles, .sqlite, .zip, .gemf)…</string>
+    <string name="menu_offline_import">+ Kartendateien importieren…</string>
     <string name="menu_offline_delete">Karte löschen…</string>
     <string name="menu_offline_folder">Wo liegen die Karten?</string>
-    <string name="dlg_offline_folder_message">Offline-Karten liegen hier:\n\n%1$s\n\nMan kann Kartendateien auch per USB in diesen Ordner kopieren.\n\nOffline-Karten brauchen kein Internet. Über die genaueste Zoomstufe einer Karte hinaus werden die Kacheln vergrössert.</string>
+    <string name="dlg_offline_folder_message">Offline-Karten liegen hier:\n\n%1$s\n\nMan kann Kartendateien auch per USB in diesen Ordner kopieren.\n\nVektorkarte: &lt;name&gt;-vector.mbtiles und &lt;name&gt;-style.zip (Stil, Symbole, Schriften), dazu wahlweise &lt;name&gt;-hillshade.mbtiles und &lt;name&gt;-relief.mbtiles. Rasterkarten: .mbtiles-Dateien; Dateien mit type = overlay erscheinen in der Overlay-Liste.\n\nOffline-Karten brauchen kein Internet. Über die genaueste Zoomstufe einer Karte hinaus werden die Kacheln vergrössert.</string>
     <string name="dlg_offline_delete_title">Offline-Karte löschen</string>
     <string name="dlg_offline_delete_confirm">\"%1$s\" von diesem Gerät löschen?</string>
     <string name="dlg_offline_import_title">Karte wird importiert…</string>
@@ -76,7 +76,7 @@
     <string name="btn_cancel">Abbrechen</string>
     <string name="toast_offline_imported">Karte importiert: %1$s</string>
     <string name="toast_offline_import_failed">Import fehlgeschlagen: %1$s</string>
-    <string name="toast_offline_unsupported">Dateityp nicht unterstützt. Bitte .mbtiles, .sqlite, .zip, .gemf oder .gpx verwenden</string>
+    <string name="toast_offline_unsupported">Dateityp nicht unterstützt. Bitte .mbtiles oder ein Stilpaket *-style.zip verwenden</string>
     <string name="toast_offline_no_space">Nicht genug Speicherplatz (%1$s benötigt)</string>
     <string name="toast_offline_open_failed">Offline-Karte kann nicht geöffnet werden: %1$s</string>
     <string name="header_pins">Pins</string>
@@ -105,4 +105,22 @@
     <string name="toast_go_to">Gehe zu %1$s</string>
     <string name="toast_place_not_found">Ort „%1$s“ nicht gefunden</string>
     <string name="toast_place_search_failed">Fehler bei der Ortssuche</string>
+    <string name="offline_import_hint">.mbtiles; Vektorkarte: *-vector.mbtiles und *-style.zip (dazu *-hillshade/-relief.mbtiles)</string>
+    <string name="menu_offline_download">+ Offline-Karte herunterladen…</string>
+    <string name="offline_download_hint">Vektorkarten von lorimaps-vector-render (GitHub)</string>
+    <string name="offline_download_running">Download läuft – die Karte erscheint hier, sobald er fertig ist</string>
+    <string name="offline_bad_zip_name">%1$s: Nur Stilpakete einer Vektorkarte (Name endet auf -style.zip) können importiert werden</string>
+    <string name="offline_no_style_json">%1$s enthält keine style.json</string>
+    <string name="offline_details_vector">offline, Vektor, %1$s</string>
+    <string name="offline_details_raster">offline, %1$s</string>
+    <string name="dlg_download_title">Offline-Karte herunterladen</string>
+    <string name="dlg_download_loading">Liste der Karten wird geladen…</string>
+    <string name="dlg_download_hint">Neueste Ausgabe (%1$s). Antippen zum Herunterladen:</string>
+    <string name="dlg_download_none">Keine Karten gefunden</string>
+    <string name="dlg_download_failed">Liste konnte nicht geladen werden: %1$s</string>
+    <string name="dlg_download_confirm">„%1$s“ (%2$s) herunterladen?\n\nDie Dateien werden im Hintergrund geladen (am besten im WLAN). Danach erscheint die Karte unter Offline-Karten; eine ältere Version wird ersetzt.</string>
+    <string name="btn_download">Herunterladen</string>
+    <string name="toast_download_started">Download gestartet: %1$s</string>
+    <string name="toast_download_done">Offline-Karte bereit: %1$s</string>
+    <string name="toast_download_failed">Download fehlgeschlagen: %1$s</string>
 </resources>
